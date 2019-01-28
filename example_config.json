@@ -10,16 +10,30 @@
           "answer1": {
             "http_status": 200,
             "queries": {
-              "example_query_1": "example",
-              "query_data": "query_data"
+              "example_query_1": "example1",
+              "query_data": "query_data1"
             },
             "request_headers": {
-              "example_request_header": "example"
+              "example_request_header": "example1"
             },
             "response_headers": {
-              "example_response_header": "example"
+              "example_response_header": "example1"
             },
-            "data": "testing_data\n"
+            "data": "testing_data1\n"
+          },
+          "answer2": {
+            "http_status": 200,
+            "queries": {
+              "example_query_2": "example2",
+              "query_data": "query_data2"
+            },
+            "request_headers": {
+              "example_request_header": "example2"
+            },
+            "response_headers": {
+              "example_response_header": "example2"
+            },
+            "data": "testing_data2\n"
           }
         }
       },
@@ -50,7 +64,7 @@
         }
       }
     ],
-    "api/v1/example2":[
+    "api/v1/example2": [
       {
         "method": "GET",
         "answers": {

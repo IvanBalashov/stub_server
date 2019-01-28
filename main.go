@@ -15,9 +15,9 @@ import (
 )
 
 type Config struct {
-	Version string             `json:"version"`
-	Host    string             `json:"host"`
-	Port    string             `json:"port"`
+	Version string                     `json:"version"`
+	Host    string                     `json:"host"`
+	Port    string                     `json:"port"`
 	Urls    map[string][]methods.Query `json:"urls"`
 }
 
@@ -55,12 +55,13 @@ func YamlConfig(path string) (Config, error) {
 }
 
 func main() {
-	var path = "example_config.json"
 	config := Config{}
 	var err error
-	configJson := flag.String("--json", "config.json", "setup server with .json config")
-	configYaml := flag.String("--yaml", "", "setup server with .yaml config")
+
+	configJson := flag.String("json", "config.json", "setup server with .json config")
+	configYaml := flag.String("yaml", "", "setup server with .yaml config")
 	flag.Parse()
+
 	if *configYaml != "" {
 		config, err = YamlConfig(*configYaml)
 		if err != nil {
@@ -68,7 +69,7 @@ func main() {
 		}
 	}
 	if *configJson != "" {
-		config, err = JsonConfig(path)
+		config, err = JsonConfig(*configJson)
 		if err != nil {
 			os.Exit(2)
 		}
@@ -76,39 +77,39 @@ func main() {
 
 	handler := gin.New()
 	handler.Use(Logger())
-	for key, urls := range config.Urls {
-		for _, url := range urls {
-			for _, val := range url.Answers {
-				switch url.Method {
-				case "GET":
-					handler.GET(key, func(ctx *gin.Context) {
-						methods.Get(val, ctx)
-					})
-				case "POST":
-					handler.POST(key, func(ctx *gin.Context) {
-						methods.Post(val, ctx)
-					})
-				case "PUT":
-					handler.PUT(key, func(ctx *gin.Context) {
-						methods.Put(val, ctx)
-					})
-				case "DELETE":
-					handler.DELETE(key, func(ctx *gin.Context) {
-						methods.Delete(val, ctx)
-					})
-				case "PATCH":
-					handler.PATCH(key, func(ctx *gin.Context) {
-						methods.Patch(val, ctx)
-					})
-				case "HEAD":
-					handler.HEAD(key, func(ctx *gin.Context) {
-						methods.Head(val, ctx)
-					})
-				case "OPTIONS":
-					handler.OPTIONS(key, func(ctx *gin.Context) {
-						methods.Options(val, ctx)
-					})
-				}
+
+	for url, data := range config.Urls {
+		for _, queries := range data {
+			newAnswers := queries.Answers
+			switch queries.Method {
+			case "GET":
+				handler.GET(url, func(ctx *gin.Context) {
+					methods.Get(newAnswers, ctx)
+				})
+			case "POST":
+				handler.POST(url, func(ctx *gin.Context) {
+					methods.Post(queries.Answers, ctx)
+				})
+			case "PUT":
+				handler.PUT(url, func(ctx *gin.Context) {
+					methods.Put(queries.Answers, ctx)
+				})
+			case "DELETE":
+				handler.DELETE(url, func(ctx *gin.Context) {
+					methods.Delete(queries.Answers, ctx)
+				})
+			case "PATCH":
+				handler.PATCH(url, func(ctx *gin.Context) {
+					methods.Patch(queries.Answers, ctx)
+				})
+			case "HEAD":
+				handler.HEAD(url, func(ctx *gin.Context) {
+					methods.Head(queries.Answers, ctx)
+				})
+			case "OPTIONS":
+				handler.OPTIONS(url, func(ctx *gin.Context) {
+					methods.Options(queries.Answers, ctx)
+				})
 			}
 		}
 	}

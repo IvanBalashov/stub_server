@@ -16,7 +16,7 @@ type Answers struct {
 	Queries         map[string]string   `json:"queries,omitempty"`
 	RequestHeaders  map[string]string   `json:"request_headers,omitempty"`
 	ResponseHeaders map[string]string   `json:"response_headers,omitempty"`
-	PostForm   map[string]string   `json:"post_arguments,omitempty"`
+	PostForm        map[string]string   `json:"post_arguments,omitempty"`
 	Data            string              `json:"data"`
 	DataFromFile    string              `json:"data_from_file"`
 	Cookies         map[string][]Cookie `json:"cookies,omitempty"`

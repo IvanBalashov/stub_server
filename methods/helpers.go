@@ -70,13 +70,11 @@ func checkHeaders(headers map[string]string, ctx *gin.Context) bool {
 	return true
 }
 
-
 func checkPostForm(form map[string]string, ctx *gin.Context) bool {
-	for key, val := range form{
+	for key, val := range form {
 		if ctx.PostForm(key) != val {
 			return false
 		}
 	}
 	return true
 }
-

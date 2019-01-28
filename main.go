@@ -1,14 +1,16 @@
 package main
 
 import (
-	"bytes"
 	"encoding/json"
+	"flag"
 	"github.com/gin-gonic/gin"
+	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"log"
 	"net"
 	"net/http"
 	"os"
+	"stub_server/methods"
 	"time"
 )
 
@@ -16,30 +18,7 @@ type Config struct {
 	Version string             `json:"version"`
 	Host    string             `json:"host"`
 	Port    string             `json:"port"`
-	Urls    map[string][]Query `json:"urls"`
-}
-
-type Query struct {
-	Method        string              `json:"method"`
-	Queries       map[string]string   `json:"queries"`
-	HttpStatus    int                 `json:"http_status"`
-	Headers       map[string]string   `json:"headers"`
-	Data          string              `json:"data"`
-	MimeType      string              `json:"mime_type"`
-	PostArguments map[string]string   `json:"post_arguments,omitempty"`
-	File          string              `json:"file,omitempty"`
-	Img           string              `json:"img,omitempty"`
-	Cookies       map[string][]Cookie `json:"cookies"`
-}
-
-type Cookie struct {
-	Name     string `json:"name"`
-	Value    string `json:"value"`
-	MaxAge   int    `json:"max_age,omitempty"`
-	Path     string `json:"path"`
-	Domain   string `json:"domain,omitempty"`
-	Secure   bool   `json:"secure,omitempty"`
-	HttpOnly bool   `json:"http_only,omitempty"`
+	Urls    map[string][]methods.Query `json:"urls"`
 }
 
 func init() {
@@ -47,9 +26,9 @@ func init() {
 	log.SetFlags(log.LstdFlags)
 }
 
-func ReadConfig() (Config, error) {
+func JsonConfig(path string) (Config, error) {
 	conf := Config{}
-	data, err := ioutil.ReadFile("config.json")
+	data, err := ioutil.ReadFile(path)
 	if err != nil {
 		log.Printf("error while read .config.json - %s\n", err.Error())
 		return Config{}, err
@@ -61,61 +40,75 @@ func ReadConfig() (Config, error) {
 	return conf, nil
 }
 
-func main() {
-	config, err := ReadConfig()
+func YamlConfig(path string) (Config, error) {
+	conf := Config{}
+	data, err := ioutil.ReadFile(path)
 	if err != nil {
-		os.Exit(2)
+		log.Printf("error while read config.yaml - %s\n", err.Error())
+		return Config{}, err
 	}
-	handler := gin.Default()
+	if err := yaml.Unmarshal(data, &conf); err != nil {
+		log.Printf("error while parse .config.yaml - %s\n", err.Error())
+		return Config{}, err
+	}
+	return conf, nil
+}
 
-	for key, url := range config.Urls {
-		for _, val := range url {
-			switch val.Method {
-			case "GET":
-				handler.GET(key, func(ctx *gin.Context) {
-					if val.Cookies != nil {
-						setCookies(val.Cookies, ctx)
-					}
-					setHeaders(val.Headers, ctx)
-					ctx.Data(http.StatusOK, val.MimeType, bytes.NewBufferString(val.Data).Bytes())
-				})
-			case "POST":
-				handler.POST(key, func(ctx *gin.Context) {
-					if val.Cookies != nil {
-						setCookies(val.Cookies, ctx)
-					}
-					setHeaders(val.Headers, ctx)
-					setPostForm(val.PostArguments, ctx)
-					ctx.Data(http.StatusOK, val.MimeType, bytes.NewBufferString(val.Data).Bytes())
-				})
-			case "PUT":
-				handler.PUT(key, func(ctx *gin.Context) {
-					if val.Cookies != nil {
-						setCookies(val.Cookies, ctx)
-					}
-					setHeaders(val.Headers, ctx)
-					ctx.Data(http.StatusOK, val.MimeType, bytes.NewBufferString(val.Data).Bytes())
-				})
-			case "DELETE":
-				handler.DELETE(key, func(ctx *gin.Context) {
-					setHeaders(val.Headers, ctx)
-					ctx.Data(http.StatusOK, val.MimeType, bytes.NewBufferString(val.Data).Bytes())
-				})
-			case "PATCH":
-				handler.PATCH(key, func(ctx *gin.Context) {
-					setHeaders(val.Headers, ctx)
-					ctx.Data(http.StatusOK, val.MimeType, bytes.NewBufferString(val.Data).Bytes())
-				})
-			case "HEAD":
-				handler.HEAD(key, func(ctx *gin.Context) {
-					setHeaders(val.Headers, ctx)
-					ctx.Data(http.StatusOK, val.MimeType, bytes.NewBufferString(val.Data).Bytes())
-				})
-			case "OPTIONS":
-				handler.OPTIONS(key, func(ctx *gin.Context) {
-					setHeaders(val.Headers, ctx)
-					ctx.Data(http.StatusOK, val.MimeType, bytes.NewBufferString(val.Data).Bytes())
-				})
+func main() {
+	var path = "example_config.json"
+	config := Config{}
+	var err error
+	configJson := flag.String("--json", "config.json", "setup server with .json config")
+	configYaml := flag.String("--yaml", "", "setup server with .yaml config")
+	flag.Parse()
+	if *configYaml != "" {
+		config, err = YamlConfig(*configYaml)
+		if err != nil {
+			os.Exit(2)
+		}
+	}
+	if *configJson != "" {
+		config, err = JsonConfig(path)
+		if err != nil {
+			os.Exit(2)
+		}
+	}
+
+	handler := gin.New()
+	handler.Use(Logger())
+	for key, urls := range config.Urls {
+		for _, url := range urls {
+			for _, val := range url.Answers {
+				switch url.Method {
+				case "GET":
+					handler.GET(key, func(ctx *gin.Context) {
+						methods.Get(val, ctx)
+					})
+				case "POST":
+					handler.POST(key, func(ctx *gin.Context) {
+						methods.Post(val, ctx)
+					})
+				case "PUT":
+					handler.PUT(key, func(ctx *gin.Context) {
+						methods.Put(val, ctx)
+					})
+				case "DELETE":
+					handler.DELETE(key, func(ctx *gin.Context) {
+						methods.Delete(val, ctx)
+					})
+				case "PATCH":
+					handler.PATCH(key, func(ctx *gin.Context) {
+						methods.Patch(val, ctx)
+					})
+				case "HEAD":
+					handler.HEAD(key, func(ctx *gin.Context) {
+						methods.Head(val, ctx)
+					})
+				case "OPTIONS":
+					handler.OPTIONS(key, func(ctx *gin.Context) {
+						methods.Options(val, ctx)
+					})
+				}
 			}
 		}
 	}
@@ -139,30 +132,14 @@ func main() {
 	}
 }
 
-func setHeaders(headers map[string]string, ctx *gin.Context) {
-	for key, val := range headers {
-		ctx.Header(key, val)
-	}
-}
-
-func setPostForm(args map[string]string, ctx *gin.Context) {
-	for key, val := range args {
-		if val != ctx.PostForm(key) {
-			ctx.JSON(http.StatusBadRequest, gin.H{})
-		}
-	}
-}
-
-func setCookies(cookies map[string][]Cookie, ctx *gin.Context) {
-	for _, val := range cookies {
-		for i := range val {
-			ctx.SetCookie(val[i].Name,
-				val[i].Value,
-				val[i].MaxAge,
-				val[i].Path,
-				val[i].Domain,
-				val[i].Secure,
-				val[i].HttpOnly)
-		}
+func Logger() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		t := time.Now()
+		c.Next()
+		latency := time.Since(t)
+		status := c.Writer.Status()
+		url := c.Request.URL
+		host := c.Request.Host
+		log.Printf("Http_Server: Status - %3v |Latency - %6v |Host - %10v |Url - %40v ", status, latency, host, url)
 	}
 }

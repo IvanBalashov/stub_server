@@ -1,0 +1,76 @@
+{
+  "version": "example",
+  "host": "localhost",
+  "port": "8080",
+  "urls": {
+    "api/v1/example1": [
+      {
+        "method": "GET",
+        "answers": {
+          "answer1": {
+            "http_status": 200,
+            "queries": {
+              "example_query_1": "example",
+              "query_data": "query_data"
+            },
+            "request_headers": {
+              "example_request_header": "example"
+            },
+            "response_headers": {
+              "example_response_header": "example"
+            },
+            "data": "testing_data\n"
+          }
+        }
+      },
+      {
+        "method": "POST",
+        "answers": {
+          "answer1": {
+            "http_status": 200,
+            "queries": {
+              "example_query_1": "example",
+              "example_query_2": "example",
+              "example_query_3": "example"
+            },
+            "expected_headers": {
+              "header_1": "val1",
+              "header_2": "val2",
+              "header_3": "val3",
+              "headers_data": "data"
+            },
+            "post_forms": {
+              "arg1": "val1",
+              "arg2": "val2",
+              "arg3": "val3",
+              "post_data": "post_data"
+            },
+            "data": ""
+          }
+        }
+      }
+    ],
+    "api/v1/example2":[
+      {
+        "method": "GET",
+        "answers": {
+          "answer1": {
+            "http_status": 200,
+            "queries": {
+              "example_query_1": "example",
+              "example_query_2": "example",
+              "example_query_3": "example"
+            },
+            "expected_headers": {
+              "header_1": "val1",
+              "header_2": "val2",
+              "header_3": "val3",
+              "headers_data": "data"
+            },
+            "data": ""
+          }
+        }
+      }
+    ]
+  }
+}

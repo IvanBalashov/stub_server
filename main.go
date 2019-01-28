@@ -141,6 +141,6 @@ func Logger() gin.HandlerFunc {
 		status := c.Writer.Status()
 		url := c.Request.URL
 		host := c.Request.Host
-		log.Printf("Http_Server: Status - %3v |Latency - %6v |Host - %10v |Url - %40v ", status, latency, host, url)
+		log.Printf("Http_Server: Status - %3v |Latency %10v |Host - %10v |Url %40v ", status, latency, host, url)
 	}
 }

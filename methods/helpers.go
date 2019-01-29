@@ -2,7 +2,6 @@ package methods
 
 import (
 	"github.com/gin-gonic/gin"
-	"net/http"
 )
 
 func setHeaders(headers map[string]string, ctx *gin.Context) {
@@ -12,18 +11,6 @@ func setHeaders(headers map[string]string, ctx *gin.Context) {
 
 	for key, val := range headers {
 		ctx.Header(key, val)
-	}
-}
-
-func setPostForm(args map[string]string, ctx *gin.Context) {
-	if args == nil {
-		return
-	}
-
-	for key, val := range args {
-		if val != ctx.PostForm(key) {
-			ctx.JSON(http.StatusBadRequest, gin.H{})
-		}
 	}
 }
 

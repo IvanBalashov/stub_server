@@ -34,6 +34,17 @@
               "example_response_header": "example2"
             },
             "data": "testing_data2\n"
+          },
+          "answer3": {
+            "http_status": 200,
+            "mime_type": "image/jpeg",
+            "queries": {
+              "example_query_3": "example3"
+            },
+            "response_headers": {
+              "Content-length": "22067"
+            },
+            "data_from_file": "gofer.jpg"
           }
         }
       },

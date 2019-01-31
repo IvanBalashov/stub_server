@@ -28,15 +28,18 @@ func init() {
 
 func JsonConfig(path string) (Config, error) {
 	conf := Config{}
+
 	data, err := ioutil.ReadFile(path)
 	if err != nil {
 		log.Printf("error while read .config.json - %s\n", err.Error())
 		return Config{}, err
 	}
+
 	if err := json.Unmarshal(data, &conf); err != nil {
 		log.Printf("error while parse .config.json - %s\n", err.Error())
 		return Config{}, err
 	}
+
 	return conf, nil
 }
 
@@ -126,6 +129,7 @@ func main() {
 		ReadHeaderTimeout: time.Second * 5,
 		WriteTimeout:      time.Second * 10,
 	}
+
 	log.Printf("Server starting on - %s", server.Addr)
 	if err := server.ListenAndServe(); err != nil {
 		log.Printf("Error while serving - \n\t%s", err.Error())

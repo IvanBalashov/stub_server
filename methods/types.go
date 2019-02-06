@@ -13,7 +13,7 @@ type Answers struct {
 	HttpStatus      int                 `json:"http_status"`
 	MimeType        string              `json:"mime_type"`
 	WaitTime        string              `json:"wait_time,omitempty"`
-	Queries         map[string]string   `json:"queries,omitempty"`
+	Queries         map[string]string   `json:"query_arguments,omitempty"`
 	RequestHeaders  map[string]string   `json:"request_headers,omitempty"`
 	ResponseHeaders map[string]string   `json:"response_headers,omitempty"`
 	PostForm        map[string]string   `json:"post_arguments,omitempty"`

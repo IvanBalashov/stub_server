@@ -59,6 +59,9 @@ func checkHeaders(headers map[string]string, ctx *gin.Context) bool {
 
 func checkPostForm(form map[string]string, ctx *gin.Context) bool {
 	for key, val := range form {
+		if key == "post_data" {
+			continue
+		}
 		if ctx.PostForm(key) != val {
 			return false
 		}

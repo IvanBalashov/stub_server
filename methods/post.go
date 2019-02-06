@@ -42,34 +42,6 @@ func Post(answers map[string]Answers, ctx *gin.Context) {
 			}
 		}
 
-		if val.PostForm != nil {
-			if checkPostForm(val.PostForm, ctx) {
-				if _, ok := val.PostForm["post_data"]; ok {
-					args.Data = bytes.NewBufferString(val.Queries["post_data"]).Bytes()
-				} else {
-					if val.Data != "" && len(args.Data) == 0 {
-						args.Data = bytes.NewBufferString(val.Data).Bytes()
-					} else {
-						noErr = false
-						success = false
-						errMsg.Error = "Post Form doesn't equal with form from config..."
-					}
-				}
-				args.Code = val.HttpStatus
-				args.MimeType = val.MimeType
-			} else {
-				if val.Data == "" {
-					noErr = false
-					success = false
-					errMsg.Error = "Don't know what return..."
-				} else {
-					args.Code = val.HttpStatus
-					args.MimeType = val.MimeType
-					args.Data = bytes.NewBufferString(val.Data).Bytes()
-				}
-			}
-		}
-
 		if val.Queries != nil {
 			if checkQueries(val.Queries, ctx) {
 				if _, ok := val.Queries["query_data"]; ok {
@@ -90,6 +62,36 @@ func Post(answers map[string]Answers, ctx *gin.Context) {
 					noErr = false
 					errMsg.Error = "Don't know what return..."
 					success = false
+				} else {
+					args.Code = val.HttpStatus
+					args.MimeType = val.MimeType
+					args.Data = bytes.NewBufferString(val.Data).Bytes()
+				}
+			}
+		}
+
+		if val.PostForm != nil {
+			if checkPostForm(val.PostForm, ctx) {
+				if _, ok := val.PostForm["post_data"]; ok {
+					args.Data = bytes.NewBufferString(val.PostForm["post_data"]).Bytes()
+					success = true
+					noErr = true
+				} else {
+					if val.Data != "" && len(args.Data) == 0 {
+						args.Data = bytes.NewBufferString(val.Data).Bytes()
+					} else {
+						noErr = false
+						success = false
+						errMsg.Error = "Post Form doesn't equal with form from config..."
+					}
+				}
+				args.Code = val.HttpStatus
+				args.MimeType = val.MimeType
+			} else {
+				if val.Data == "" {
+					noErr = false
+					success = false
+					errMsg.Error = "Don't know what return..."
 				} else {
 					args.Code = val.HttpStatus
 					args.MimeType = val.MimeType
